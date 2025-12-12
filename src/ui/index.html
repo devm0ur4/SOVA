@@ -16,20 +16,7 @@
         <div class="main-container">
             <aside>
                 <h2>Status</h2>
-                <textarea name="status" id="status" readonly>
-                    >Lorem Ipsum
-                    >Lorem Ipsum
-                    >Lorem Ipsum
-
-                    >Lorem Ipsum
-                    >Lorem Ipsum
-                    >Lorem Ipsum
-                    >Lorem Ipsum
-                    >Lorem Ipsum
-                    >Lorem Ipsum
-                    >Lorem Ipsum
-
-                </textarea>
+                <textarea name="status" id="status" readonly></textarea>
             </aside>
             <section class="action-container">
                 <h2>Ações</h2>
@@ -38,8 +25,7 @@
                         <h2 id="order-text">Isso é um teste</h2>
                     </div>
                     <div class="action-buttons">
-                        <button id="accept">ACEITAR</button>
-                        <button id="reject">REJEITAR</button>
+                        <button id="ok">OK</button>
                     </div>
                     <div class="action-input">
                         <input id="input" type="text">
@@ -49,6 +35,10 @@
             </section>    
         </div>
     </main>
-    <button id="stop">ENCERRAR PROCESSO</button>
+    <button id="stop" onclick="kill()">ENCERRAR PROCESSO</button>
+
+
+    <script src="/eel.js"></script>
+    <script src="js/script.js" defer></script>
 </body>
 </html>

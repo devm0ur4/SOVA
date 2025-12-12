@@ -92,7 +92,7 @@ button#stop:hover{
     transition: background-color 0.3s;
     background-color: #440101;
 }
-button#accept:hover{
+button#ok:hover{
     transition: background-color 0.3s;
     background-color: #014407;
 }
@@ -103,10 +103,6 @@ button#send{
 button#send:hover{
     transition: background-color 0.3s;
     background-color: #014407;
-}
-button#reject:hover{
-    transition: background-color 0.3s;
-    background-color: #440101;
 }
 .action-input{
     width: 100%;
