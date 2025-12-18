@@ -2,7 +2,7 @@ from time import sleep
 from .captcha import check_captcha
 from selenium.webdriver.common.by import By
 from time import sleep
-import GUI
+from src import GUI
 
 def get_credentials():
     GUI.updateOrder("Insira seu usuario:")
