@@ -3,10 +3,16 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from time import sleep
 
-## muda a filial que vai ser acessada
-def switchBranch(driver, branchCode):
-    wait = WebDriverWait(driver, 2)
+driver = None
 
+def setup(driver_):
+    global driver
+    driver = driver_
+
+wait = WebDriverWait(driver, 5)
+
+## muda a filial que vai ser acessada
+def switchBranch(branchCode):
     ## clica no botão de perfil
 
     perfil_btn = wait.until(
@@ -60,9 +66,8 @@ def switchBranch(driver, branchCode):
     ## aguarda a mudança ser feita
     sleep(5)
 
-def scrapTable(driver):
-    wait = WebDriverWait(driver, 0.5)
-   
+## pega os dados da tabela
+def scrapTable():
     driver.get('https://plataforma.ticketlog.com.br/legacy?link=R29vZE1hbmFnZXJTU0wvY29tdW0vZm9ybW5vdGFmaXNjYWxlbGV0cm9uaWNhLmNmbQ%3D%3D')
 
 
@@ -85,6 +90,18 @@ def scrapTable(driver):
     else:
         driver.get('https://plataforma.ticketlog.com.br/home')
         return False
+
+## baixar os pdfs
+def downloadPDFs():
+    boleto_btn = wait.until(
+        EC.element_to_be_clickable(
+            (By.XPATH, "//a[contains(@onClick, 'aBoleto')]")
+        )
+    )
+    pass
+
+def scrapper(branchCode):
+    pass
 
 # TODO: def downloadPDFs()
 # função que vai baixar os pdfs e jogar na pasta downloads
