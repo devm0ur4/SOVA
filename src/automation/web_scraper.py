@@ -98,7 +98,16 @@ def downloadPDFs():
             (By.XPATH, "//a[contains(@onClick, 'aBoleto')]")
         )
     )
-    pass
+
+    boleto_btn.click()
+    """
+    try:
+        timeout = 20
+
+    catch Exception as e:
+        print("Erro ao baixar o PDF:", e)
+    """
+    
 
 def scrapper(branchCode):
     pass
