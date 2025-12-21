@@ -5,6 +5,7 @@ from time import sleep
 
 driver = None
 
+## configura a automação
 def setup(driver_):
     global driver
     driver = driver_
@@ -91,6 +92,7 @@ def scrapTable():
         driver.get('https://plataforma.ticketlog.com.br/home')
         return False
 
+
 ## baixar os pdfs
 def downloadPDFs():
     boleto_btn = wait.until(
@@ -100,13 +102,30 @@ def downloadPDFs():
     )
 
     boleto_btn.click()
-    """
-    try:
-        timeout = 20
 
-    catch Exception as e:
-        print("Erro ao baixar o PDF:", e)
-    """
+    DOWNLOAD_DIR = Path("downloads")
+
+    try:
+        timeout = 10
+
+        end = time.time() + timeout
+        pdfs = list(DOWNLOAD_DIR.glob("*.pdf"))
+
+        boleto_pdf ## retorna o boleto 
+        while time.time() < end:
+            if pdfs:
+                global boleto_pdf 
+                boleto_pdf = pdfs[0]
+                return True
+    
+            time.sleep(0.5)             
+
+    except Exception as e:
+        driver.get('https://plataforma.ticketlog.com.br/home')
+        return False
+    
+
+    
     
 
 def scrapper(branchCode):
