@@ -1,24 +1,24 @@
+from pyparsing import Path
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from time import sleep
+import time
 
-driver = None
+## setup - cria o contexto da automação
+def setup(driver, timeout=5):
+    return {
+        "driver": driver,
+        "wait": WebDriverWait(driver, timeout)
+    }
 
-## configura a automação
-def setup(driver_):
-    global driver
-    driver = driver_
 
-wait = WebDriverWait(driver, 5)
-
-## muda a filial que vai ser acessada
+## switchBranch - muda a filial que vai ser acessada
 def switchBranch(branchCode):
-    ## clica no botão de perfil
 
     perfil_btn = wait.until(
         EC.element_to_be_clickable(
-            (By.XPATH, "//a[contains(@aria-label, 'perfil')]]")
+            (By.XPATH, "//a[contains(@aria-label, 'perfil')]")
         )
     )
     perfil_btn.click()
@@ -27,7 +27,7 @@ def switchBranch(branchCode):
 
     options_btn = wait.until(
         EC.element_to_be_clickable(
-            (By.XPATH, "//a[contains(@data-cy, 'navbar-access-options-link')]]")
+            (By.XPATH, "//a[contains(@data-cy, 'navbar-access-options-link')]")
         )
     )
 
@@ -67,7 +67,7 @@ def switchBranch(branchCode):
     ## aguarda a mudança ser feita
     sleep(5)
 
-## pega os dados da tabela
+## scrapTable - coleta as informações da tabela
 def scrapTable():
     driver.get('https://plataforma.ticketlog.com.br/legacy?link=R29vZE1hbmFnZXJTU0wvY29tdW0vZm9ybW5vdGFmaXNjYWxlbGV0cm9uaWNhLmNmbQ%3D%3D')
 
@@ -93,7 +93,7 @@ def scrapTable():
         return False
 
 
-## baixar os pdfs
+## downloadPDFs - baixar os pdfs
 def downloadPDFs():
     boleto_btn = wait.until(
         EC.element_to_be_clickable(
@@ -103,7 +103,10 @@ def downloadPDFs():
 
     boleto_btn.click()
 
-    DOWNLOAD_DIR = Path("downloads")
+    ## caminhos dos diretórios 
+    BASE_DIR = Path(__file__).resolve().parents[1]
+    DOWNLOAD_DIR = BASE_DIR / "downloads"
+    RAW = BASE_DIR / "storage/raw"
 
     try:
         timeout = 10
@@ -118,7 +121,10 @@ def downloadPDFs():
                 boleto_pdf = pdfs[0]
                 return True
     
-            time.sleep(0.5)             
+            time.sleep(0.5)
+
+        ## move o pdf para storage/raw
+
 
     except Exception as e:
         driver.get('https://plataforma.ticketlog.com.br/home')
@@ -126,14 +132,6 @@ def downloadPDFs():
     
 
     
-    
-
-def scrapper(branchCode):
-    pass
-
-# TODO: def downloadPDFs()
-# função que vai baixar os pdfs e jogar na pasta downloads
-
 # TODO: def scrapper()
 # toda lógica e execução da automação da parte do site - função com execução unica, 
 # a lógica de execução multipla vai acontecer lá no main.py

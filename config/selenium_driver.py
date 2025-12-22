@@ -1,10 +1,10 @@
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from pathlib import Path
+from config.paths import BASE_DIR
 
 def create_driver():
-    base_dir = Path(__file__).resolve().parents[1]  # raiz do projeto
-    download_dir = base_dir / "downloads"
+    download_dir = BASE_DIR / "downloads"
     download_dir.mkdir(exist_ok=True)
 
     chrome_options = Options()

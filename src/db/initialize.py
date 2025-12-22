@@ -1,10 +1,9 @@
 from .connection import get_connection
 from pathlib import Path
+from config.paths import DB_DIR
 
-BASE_DIR = Path(__file__).parent
-
-SQL_SCHEMA = BASE_DIR / "sql/schema.sql"
-SQL_SEED = BASE_DIR / "sql/seed.sql"
+SQL_SCHEMA = DB_DIR / "sql/schema.sql"
+SQL_SEED = DB_DIR / "sql/seed.sql"
 
 def start_db():
     with get_connection() as conn:
