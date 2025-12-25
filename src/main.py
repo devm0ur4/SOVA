@@ -35,7 +35,7 @@ try:
 
     except Exception as e:
         GUI.updateStatus("NÃO FOI POSSÍVEL INICIAR A APLICAÇÃO, ENCERRANDO O SISTEMA...")
-        sleep(4)
+        sleep(3)
         GUI.kill()
 
     GUI.updateStatus("Site carregado com sucesso.")

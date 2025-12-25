@@ -1,11 +1,13 @@
 from pathlib import Path
 
+# raiz do projeto
+BASE_DIR = Path(__file__).resolve().parent.parent
 
-## raiz do projeto
-BASE_DIR = Path(__file__).resolve().parents[2]  
+# diretórios principais
+SRC_DIR = BASE_DIR / "src"
+CONFIG_DIR = BASE_DIR / "config"
 
-
-## diretorios do projeto
-DB_DIR = BASE_DIR / "src/db"
+DB_DIR = SRC_DIR / "db"
 DOWNLOAD_DIR = BASE_DIR / "downloads"
-RAW_DIR = BASE_DIR / "storage/raw"
+STORAGE_DIR = BASE_DIR / "storage"
+RAW_DIR = STORAGE_DIR / "raw"
