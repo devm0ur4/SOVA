@@ -1,1 +1,2 @@
 # TODO: vai ler as coisas dentro dos arquivos PDFS e fazer toda manipulação, como renomear e juntar e tals
+

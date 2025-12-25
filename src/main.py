@@ -9,12 +9,12 @@ import threading
 from time import sleep
 
 ## projeto
-from config.selenium_driver import create_driver
+from config.selenium_driver import DriverConfig
 from src import GUI
-from src.auth import login as auth_login
+"""from src.auth import login as auth_login"""
 
-
-driver = create_driver()
+DriverConfig.create_driver()
+driver = DriverConfig.get_driver()
 url = "https://sso.sa.edenred.io/web/session/step/password?returnUrl=%2Fconnect%2Fauthorize%2Fcallback%3Fresponse_type%3Dcode%26client_id%3Dfcfc49a2ff3b45ef9c5f245b37b4d567%26state%3Dc0Jib0xEWmY3akRxcnVOUEhySEtlOU84YmtaYngyMEFWODBKMnYudnl0QVow%26redirect_uri%3Dhttps%253A%252F%252Fplataforma.ticketlog.com.br%252Flogin-callback%26scope%3Dopenid%2520profile%2520email%2520portal-fleet-and-mobility-ms_application-mfa%2520offline_access%26code_challenge%3DPJXv1O2fBIfQdgCHAGOIGdcRGzJ3mVyJOpQFwYw9djY%26code_challenge_method%3DS256%26nonce%3Dc0Jib0xEWmY3akRxcnVOUEhySEtlOU84YmtaYngyMEFWODBKMnYudnl0QVow%26acr_values%3Dtenant%253Abr-fleet-mobility"
 
 
