@@ -10,6 +10,7 @@ import time
 ##project
 import config.selenium_driver as selenium_driver
 from config.paths import DOWNLOAD_DIR, RAW_DIR
+from src import GUI
 
 
 ## define o driver
@@ -69,26 +70,8 @@ def downloadPDFs():
         end = time.time() + timeout
         pdfs = list(DOWNLOAD_DIR.glob("*.pdf"))
 
-        boleto_pdf ## retorna o boleto 
-        while time.time() < end:
-            if pdfs:
-                global boleto_pdf 
-                boleto_pdf = pdfs[0]
-                return True
-    
-            time.sleep(0.5)
-
-        
-        ## acha o pdf e renomeia ele para 2.pdf
-        """
-        pdf2 = max(
-            DOWNLOAD_DIR.glob("*.pdf"),
-            key=lambda f: f.stat().st_mtime
-        )
-
-        pdf2.rename(DOWNLOAD_DIR / "2.pdf")
-        """
-
+        ## baixa e renomeia o boleto
+        boleto_pdf = wait_for_pdf(DOWNLOAD_DIR)
         boleto_pdf.rename(DOWNLOAD_DIR / "2.pdf")
 
         ## volta para a pagina do financeiro
@@ -105,6 +88,16 @@ def downloadPDFs():
         ## entra no link de acesso à NFe
         driver.get(link)
 
+        ## aguarda o usuário preencher o CAPTCHA
+        GUI.waitForOkButton('Por favor, preencha o CAPTCHA e vá à tela de download do PDF, e então aperte OK para o script continuar.')
+
+        ## clica no botão de download 
+        driver_config.click("//button[.//text()[contains(., 'Salvar PDF')]]")
+
+        ## baixa e renomeia a NFe
+        NFe_pdf = wait_for_pdf(DOWNLOAD_DIR)
+        NFe_pdf.rename(DOWNLOAD_DIR / "1.pdf")
+
 
 
     except Exception as e:
@@ -113,6 +106,20 @@ def downloadPDFs():
         return False
     
 
+def wait_for_pdf(download_dir, timeout=30):
+    end = time.time() + timeout
+
+    while time.time() < end:
+        pdfs = list(download_dir.glob("*.pdf"))
+        partials = list(download_dir.glob("*.crdownload")) + \
+                   list(download_dir.glob("*.part"))
+
+        if pdfs and not partials:
+            return max(pdfs, key=lambda f: f.stat().st_mtime)
+
+        time.sleep(0.5)
+
+    raise TimeoutError("Download do PDF não finalizou")
     
 # TODO: def scrapper()
 # toda lógica e execução da automação da parte do site - função com execução unica.

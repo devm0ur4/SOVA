@@ -2,7 +2,7 @@
 pip install -r requirements.txt
 
 # gerar arquivo de dependências de acordo com a versão do programa
-python pip freeze > requirements.txt
+python -m pip freeze > requirements.txt
 
 * não esquece de estudar MARKDOWN E README
 

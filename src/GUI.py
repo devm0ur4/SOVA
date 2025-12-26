@@ -53,12 +53,19 @@ def waitForUserInput():
     return inputvalue
 
 @eel.expose
-def waitForOkButton():
+def waitForOkButton(message=None):
+    if message is None:
+        updateOrder("Aguardando o usuário apertar o botão OK.")
+    else:
+        updateOrder(message)
+
     global ok_pressed
     ok_pressed = False
     eel.waitForOk()  
     while not ok_pressed:
         sleep(1)
+
+    updateOrder("Aguarde mais instruções...")
     updateStatus("Botão OK pressionado. Continuando...")
 
 @eel.expose
