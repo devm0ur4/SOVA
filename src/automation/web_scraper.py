@@ -19,6 +19,10 @@ driver = driver_config.get_driver()
 
 FINANCEIRO_URL = 'https://plataforma.ticketlog.com.br/legacy?link=R29vZE1hbmFnZXJTU0wvY29tdW0vZm9ybW5vdGFmaXNjYWxlbGV0cm9uaWNhLmNmbQ%3D%3D'
     
+def resetting():
+    driver.get('https://plataforma.ticketlog.com.br/home')
+    sleep(2)
+
 ## switchBranch - muda a filial que vai ser acessada
 def switchBranch(branchCode):
     ## clica no perfil
@@ -57,18 +61,29 @@ def scrapTable():
 
     else:
         driver.get('https://plataforma.ticketlog.com.br/home')
-        return False
+        return 'paid'
 
+def wait_for_pdf(download_dir, timeout=20):
+    end = time.time() + timeout
+
+    while time.time() < end:
+        pdfs = list(download_dir.glob("*.pdf"))
+        partials = list(download_dir.glob("*.crdownload")) + \
+                   list(download_dir.glob("*.part"))
+
+        if pdfs and not partials:
+            return max(pdfs, key=lambda f: f.stat().st_mtime)
+
+        time.sleep(0.5)
+
+    raise TimeoutError("Download do PDF não finalizou")
+ 
 ## downloadPDFs - baixar os pdfs
 def downloadPDFs():
     ## clica no botão de gerar boletos
     driver_config.click("//a[contains(@onClick, 'aBoleto')]")
 
     try:
-        timeout = 10
-
-        end = time.time() + timeout
-        pdfs = list(DOWNLOAD_DIR.glob("*.pdf"))
 
         ## baixa e renomeia o boleto
         boleto_pdf = wait_for_pdf(DOWNLOAD_DIR)
@@ -76,7 +91,6 @@ def downloadPDFs():
 
         ## volta para a pagina do financeiro
         driver.get(FINANCEIRO_URL)
-
 
         ## encontra o link de acesso ao NFe
         row = driver_config.get_element("//table//tbody/tr[1]")
@@ -102,29 +116,7 @@ def downloadPDFs():
 
     except Exception as e:
         driver.get('https://plataforma.ticketlog.com.br/home')
-        print(f"Erro ao baixar PDF: {e}")
+        print(f"Erro ao baixar PDF(s): {e}")
         return False
     
-
-def wait_for_pdf(download_dir, timeout=30):
-    end = time.time() + timeout
-
-    while time.time() < end:
-        pdfs = list(download_dir.glob("*.pdf"))
-        partials = list(download_dir.glob("*.crdownload")) + \
-                   list(download_dir.glob("*.part"))
-
-        if pdfs and not partials:
-            return max(pdfs, key=lambda f: f.stat().st_mtime)
-
-        time.sleep(0.5)
-
-    raise TimeoutError("Download do PDF não finalizou")
-    
-# TODO: def scrapper()
-# toda lógica e execução da automação da parte do site - função com execução unica.
-
-# TODO: def scrapAll()
-# lista todas as unidades e faz a execução do scrapper em cada uma delas.
-
 

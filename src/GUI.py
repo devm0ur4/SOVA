@@ -16,7 +16,13 @@ def startGUI():
 
 ##encerra o código
 @eel.expose
-def kill():
+def kill(message=None):
+    if message is not None:
+        updateStatus(message)
+        sleep(3)
+    else:
+        updateStatus("ENCERRANDO O SISTEMA...")
+        sleep(3)
     try:
         print("Encerrando o programa...")
         eel.closeWindow()
