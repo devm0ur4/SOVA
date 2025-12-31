@@ -21,3 +21,6 @@ def merge_pdfs(output_name="merged.pdf"):
 
     merger.close()
 
+## NOTE : TERMINAR ESSA PORRA DEPOIS 
+def returnInfo():
+    pass
