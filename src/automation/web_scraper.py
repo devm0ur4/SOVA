@@ -28,7 +28,7 @@ def startScrapper():
 FINANCEIRO_URL = 'https://plataforma.ticketlog.com.br/legacy?link=R29vZE1hbmFnZXJTU0wvY29tdW0vZm9ybW5vdGFmaXNjYWxlbGV0cm9uaWNhLmNmbQ%3D%3D'
     
 def resetting():
-    driver.get('https://plataforma.ticketlog.com.br/home')
+    webDriver.get('https://plataforma.ticketlog.com.br/home')
     sleep(2)
 
 ## switchBranch - muda a filial que vai ser acessada
@@ -127,4 +127,10 @@ def downloadPDFs():
         print(f"Erro ao baixar PDF(s): {e}")
         return False
     
+"""
 
+SOVA  
+ERRO : Fatura.__init__() 
+missing 6 required positional arguments: 
+'nf', 'valor_boleto', 'valor_total', 'emissao', 'vencimento', and 'unidade_cod'
+"""
