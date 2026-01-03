@@ -8,14 +8,22 @@ from time import sleep
 import time
 
 ##project
-import config.selenium_driver as selenium_driver
 from config.paths import DOWNLOAD_DIR, RAW_DIR
 from src import GUI
 
 
-## define o driver
-driver_config = selenium_driver.DriverConfig
-driver = driver_config.get_driver()
+driverConfig = None
+webDriver = None
+
+## define o driver 
+# NOTE solução improvisada, ajeitar essa porcaria depois
+def startScrapper():
+    import config.selenium_driver as selenium_driver
+    global driverConfig
+    global webDriver    
+    driverConfig = selenium_driver.DriverConfig
+    webDriver = driverConfig.get_driver()
+    print('driver: ',webDriver)
 
 FINANCEIRO_URL = 'https://plataforma.ticketlog.com.br/legacy?link=R29vZE1hbmFnZXJTU0wvY29tdW0vZm9ybW5vdGFmaXNjYWxlbGV0cm9uaWNhLmNmbQ%3D%3D'
     
@@ -26,28 +34,28 @@ def resetting():
 ## switchBranch - muda a filial que vai ser acessada
 def switchBranch(branchCode):
     ## clica no perfil
-    driver.click("//a[contains(@aria-label, 'perfil')]")
+    driverConfig.click("//a[contains(@aria-label, 'perfil')]")
 
     ## clica nas opções
-    driver.click("//a[contains(@data-cy, 'navbar-access-options-link')]")
+    driverConfig.click("//a[contains(@data-cy, 'navbar-access-options-link')]")
 
     ## pesquisa a filial
-    driver.send_keys("//input[contains(@data-cy, 'access-options-modal-search-input')]", branchCode)
+    driverConfig.send_keys("//input[contains(@data-cy, 'access-options-modal-search-input')]", branchCode)
 
     ## seleciona a filial 
-    driver.click(f"//p[@data-cy='item-select-client-code' and text()='{branchCode}']/ancestor::td")
+    driverConfig.click(f"//p[@data-cy='item-select-client-code' and text()='{branchCode}']/ancestor::td")
 
     ## clica no botão selecionar
-    driver.click("//button[@data-cy='data-access-select-button']")
+    driverConfig.click("//button[@data-cy='data-access-select-button']")
 
     ## aguarda a mudança ser feita
     sleep(5)
 
 ## scrapTable - coleta as informações da tabela
 def scrapTable():
-    driver.get(FINANCEIRO_URL)
+    webDriver.get(FINANCEIRO_URL)
 
-    row = driver_config.get_element("//table//tbody/tr[1]")
+    row = driverConfig.get_element("//table//tbody/tr[1]")
 
     cols = row.find_elements(By.TAG_NAME, "td")
 
@@ -60,7 +68,7 @@ def scrapTable():
 
 
     else:
-        driver.get('https://plataforma.ticketlog.com.br/home')
+        webDriver.get('https://plataforma.ticketlog.com.br/home')
         return 'paid'
 
 def wait_for_pdf(download_dir, timeout=20):
@@ -81,7 +89,7 @@ def wait_for_pdf(download_dir, timeout=20):
 ## downloadPDFs - baixar os pdfs
 def downloadPDFs():
     ## clica no botão de gerar boletos
-    driver_config.click("//a[contains(@onClick, 'aBoleto')]")
+    driverConfig.click("//a[contains(@onClick, 'aBoleto')]")
 
     try:
 
@@ -90,23 +98,23 @@ def downloadPDFs():
         boleto_pdf.rename(DOWNLOAD_DIR / "2.pdf")
 
         ## volta para a pagina do financeiro
-        driver.get(FINANCEIRO_URL)
+        webDriver.get(FINANCEIRO_URL)
 
         ## encontra o link de acesso ao NFe
-        row = driver_config.get_element("//table//tbody/tr[1]")
+        row = driverConfig.get_element("//table//tbody/tr[1]")
         cols = row.find_elements(By.TAG_NAME, "td")
         col = cols[8]
         
         link = col.find_element(By.TAG_NAME, "a").get_attribute("href")
 
         ## entra no link de acesso à NFe
-        driver.get(link)
+        webDriver.get(link)
 
         ## aguarda o usuário preencher o CAPTCHA
         GUI.waitForOkButton('Por favor, preencha o CAPTCHA e vá à tela de download do PDF, e então aperte OK para o script continuar.')
 
         ## clica no botão de download 
-        driver_config.click("//button[.//text()[contains(., 'Salvar PDF')]]")
+        driverConfig.click("//button[.//text()[contains(., 'Salvar PDF')]]")
 
         ## baixa e renomeia a NFe
         NFe_pdf = wait_for_pdf(DOWNLOAD_DIR)
@@ -115,7 +123,7 @@ def downloadPDFs():
 
 
     except Exception as e:
-        driver.get('https://plataforma.ticketlog.com.br/home')
+        webDriver.get('https://plataforma.ticketlog.com.br/home')
         print(f"Erro ao baixar PDF(s): {e}")
         return False
     

@@ -17,114 +17,122 @@ from src.automation import pdf_utils
 from src.automation import web_scraper
 from src.repo.fatura import Fatura
 from src.repo import fatura, unidade
-"""from src.auth import login as auth_login"""
 
 DriverConfig.create_driver()
 driver = DriverConfig.get_driver()
 url = "https://sso.sa.edenred.io/web/session/step/password?returnUrl=%2Fconnect%2Fauthorize%2Fcallback%3Fresponse_type%3Dcode%26client_id%3Dfcfc49a2ff3b45ef9c5f245b37b4d567%26state%3Dc0Jib0xEWmY3akRxcnVOUEhySEtlOU84YmtaYngyMEFWODBKMnYudnl0QVow%26redirect_uri%3Dhttps%253A%252F%252Fplataforma.ticketlog.com.br%252Flogin-callback%26scope%3Dopenid%2520profile%2520email%2520portal-fleet-and-mobility-ms_application-mfa%2520offline_access%26code_challenge%3DPJXv1O2fBIfQdgCHAGOIGdcRGzJ3mVyJOpQFwYw9djY%26code_challenge_method%3DS256%26nonce%3Dc0Jib0xEWmY3akRxcnVOUEhySEtlOU84YmtaYngyMEFWODBKMnYudnl0QVow%26acr_values%3Dtenant%253Abr-fleet-mobility"
 
+def run():
+            try:
+                # inicia o GUI em uma thread separada
+                threading.Thread(target=GUI.startGUI).start()
+                sleep(2)
 
-try:
-    # inicia o GUI em uma thread separada
-    threading.Thread(target=GUI.startGUI).start()
-    sleep(2)
+                GUI.updateStatus("SOVA iniciado com sucesso.")
+                GUI.updateStatus("Bem vindo ao SOVA!")
 
-    GUI.updateStatus("SOVA iniciado com sucesso.")
-    GUI.updateStatus("Bem vindo ao SOVA!")
+                # Iniciando site
+                try:
+                    driver.get(url)
+                    WebDriverWait(driver, 10).until(
+                        lambda d: d.execute_script("return document.readyState") == "complete"
+                    )
 
-    # Iniciando site
-    try:
-        driver.get(url)
-        WebDriverWait(driver, 10).until(
-            lambda d: d.execute_script("return document.readyState") == "complete"
-        )
+                except Exception as e:
+                    GUI.kill("NÃO FOI POSSÍVEL INICIAR A APLICAÇÃO, ENCERRANDO O SISTEMA...")
 
-    except Exception as e:
-        GUI.kill("NÃO FOI POSSÍVEL INICIAR A APLICAÇÃO, ENCERRANDO O SISTEMA...")
+                GUI.updateStatus("Site carregado com sucesso.")
 
-    GUI.updateStatus("Site carregado com sucesso.")
+                ## Fazendo login manualmente
+                GUI.waitForOkButton('Faça o login até a página principal da TICKETLOG, quando concluído, aperte OK')
 
-    ## FIXME Login automatizado - DESATIVADO POR INCONSISTÊNCIA
-    """
-    _user, _password = auth_login.get_credentials()
+                ## Login realizado com sucesso
+                GUI.updateStatus("Login realizado com sucesso.")
+                GUI.updateStatus("Agora vamos começar com a automatização...")
 
-    auth_login.perform_login(driver, _user, _password)
-    while(auth_login.isLoggedIn(driver) == False):
-        _user, _password = auth_login.get_credentials()
-        auth_login.perform_login(driver, _user, _password)
+                ## Iniciando coleta de informações
+                units = unidade.readAll()
 
-    """
+                ## Configurando antes de iniciar o looping
+                web_scraper.startScrapper()
+                web_scraper.resetting()
 
-    ## Fazendo login manualmente
-    
-    GUI.updateOrder('Faça o login até a página principal da TICKETLOG, quando concluído, aperte OK')
-    GUI.waitForOkButton()
+                ## esperando a página carregar completamente
+                WebDriverWait(driver, 10).until(
+                        lambda d: d.execute_script("return document.readyState") == "complete"
+                    )
+                
+                web_scraper.switchBranch('236886')
+                GUI.updateStatus("Configuração inicial concluída.") 
 
-    ## Login realizado com sucesso
-    GUI.updateStatus("Login realizado com sucesso.")
-    GUI.updateStatus("Agora vamos começar com a automatização...")
+                ## coletando informações das faturas
+                for unit in units: 
+                    ## resetando para a página inicial
+                    web_scraper.resetting()
 
-    ## Iniciando coleta de informações
-    units = unidade.readAll()
+                    GUI.updateStatus('Retornando à página principal')
 
-    ## Configurando antes de iniciar o looping
-    web_scraper.switchBranch('236886')
-    web_scraper.resetting()
-    GUI.updateStatus("Configuração inicial concluída.") 
+                    fat = Fatura()
 
-    for unit in units: 
-        ## resetando para a página inicial
-        web_scraper.resetting()
+                    ## selecionando a unidade
+                    GUI.updateStatus(f'Selecionando a unidade {unit[0]}')
+                    web_scraper.switchBranch(unit[0])
 
-        GUI.updateStatus('Retornando à página principal')
+                    ## coletando as informações da fatura na tabela
+                    GUI.updateStatus(f'Coletando informações da fatura da unidade {unit[0]}')
+                    infos = web_scraper.scrapTable()
 
-        fat = Fatura()
+                    if infos != False:
+                        fat.vencimento = infos[0]
+                        fat.valor_boleto = float(infos[1])
+                        fat.nf = infos[2]
 
-        ## selecionando a unidade
-        GUI.updateStatus(f'Selecionando a unidade {unit[0]}')
-        web_scraper.switchBranch(unit[0])
+                        ## baixando os PDFs
+                        GUI.updateStatus('Baixando os PDFs...')
+                        web_scraper.downloadPDFs()
 
-        ## coletando as informações da fatura na tabela
-        GUI.updateStatus(f'Coletando informações da fatura da unidade {unit[0]}')
-        infos = web_scraper.scrapTable()
+                        GUI.updateStatus('PDFs baixados com sucesso.')
 
-        if infos != False:
-            fat.vencimento = infos[0]
-            fat.valor_boleto = float(infos[1])
-            fat.nf = infos[2]
+                        ## mesclando os PDFs
+                        pdfs_merge = pdf_utils.merge()
+                        GUI.updateStatus('PDFs mesclados com sucesso.')
 
-            ## baixando os PDFs
-            GUI.updateStatus('Baixando os PDFs...')
-            web_scraper.downloadPDFs()
+                        ## apagando os PDFs antigos
+                        for item in DOWNLOAD_DIR.iterdir():
+                            if item.is_file() or item.is_symlink():
+                                item.unlink()
+                            elif item.is_dir():
+                                shutil.rmtree(item)
 
-            GUI.updateStatus('PDFs baixados com sucesso.')
+                        ## extraindo as informações do PDF
+                        GUI.updateStatus('Extraindo as informações do PDF...')
+                        pdf_infos = pdf_utils.read_pdf(pdfs_merge)  
 
-            ## mesclando os PDFs
-            pdfs_merge = pdf_utils.merge()
-            GUI.updateStatus('PDFs mesclados com sucesso.')
+                        ## guardando ultimas informações
+                        GUI.updateStatus('Informações extraídas com sucesso.')
+                        fat.data_emissao = pdf_infos['data_emissao']
+                        fat.valor_total = pdf_infos['valor_total']
 
-            ## apagando os PDFs antigos
-            for item in DOWNLOAD_DIR.iterdir():
-                if item.is_file() or item.is_symlink():
-                    item.unlink()
-                elif item.is_dir():
-                    shutil.rmtree(item)
+                        ## renomeando fatura
+                        pdfs_merge.rename(f'{unit[0]} - {unit[3]} - NF {fat.nf} - {fat.vencimento} - RATEIO')
 
-        elif infos == 'paid':
-            GUI.updateStatus(f'A fatura da unidade {unit[0]} já foi paga. Pulando para a próxima unidade.')
-            continue
-        else:
-
-            raise Exception("Não foi possível coletar as informações da fatura.")
+                        ## inserindo no banco de dados
+                        fatura.insert(fat)
 
 
+                    elif infos == 'paid':
+                        GUI.updateStatus(f'A fatura da unidade {unit[0]} já foi paga. Pulando para a próxima unidade.')
+                        continue
+                    else:
+                        raise Exception("Não foi possível coletar as informações da fatura.")
 
 
-    ## TODO Implementar automação da coleta de informações
-
-    
-except Exception as e:
-    GUI.updateStatus(f"ERRO : {e}")
-    GUI.updateStatus("ENCERRANDO O SISTEMA...")
-    sleep(3)
-    GUI.kill()
+                
+            except Exception as e:
+                GUI.updateStatus(f"ERRO : {e}")
+                GUI.updateStatus("ENCERRANDO O SISTEMA...")
+                sleep(3)
+                GUI.kill()
+                
+if __name__ == "__main__":
+    run()

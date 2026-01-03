@@ -1,4 +1,4 @@
-from db.connection import get_connection
+from src.db.connection import get_connection
 from dataclasses import dataclass
 
 @dataclass

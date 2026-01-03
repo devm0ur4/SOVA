@@ -57,12 +57,13 @@ def start_database():
 
 
 def start_app():
-    from src.main import main
-    main()
+    from src.main import run
+    run()
 
 
 if __name__ == "__main__":
     ensure_venv()
     ensure_dependencies()
     start_database()
+    print("Iniciando aplicação...")
     start_app()

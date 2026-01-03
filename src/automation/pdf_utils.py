@@ -1,4 +1,5 @@
-from pypdf import PdfMerger 
+from pypdf import PdfWriter, PdfReader
+import re
 from config.paths import DOWNLOAD_DIR, RAW_DIR
 
 def merge_pdfs(output_name="merged.pdf"):
@@ -12,7 +13,7 @@ def merge_pdfs(output_name="merged.pdf"):
 
     output_path = RAW_DIR / output_name
 
-    merger = PdfMerger()
+    merger = PdfWriter()
     merger.append(str(pdf1))
     merger.append(str(pdf2))
 
@@ -22,5 +23,32 @@ def merge_pdfs(output_name="merged.pdf"):
     merger.close()
 
 ## NOTE : TERMINAR ESSA PORRA DEPOIS 
-def returnInfo():
-    pass
+def read_pdf(pdf_path: str):
+    reader = PdfReader(pdf_path)
+
+    texto = ""
+    for page in reader.pages:
+        texto += page.extract_text() + "\n"
+
+    # Data de emissão (dd/mm/yyyy)
+    data_emissao = re.search(r"\b(\d{2}/\d{2}/\d{4})\b", texto)
+    data_emissao = data_emissao.group(1) if data_emissao else None
+
+    # Valor total da nota fiscal
+    valor_match = re.search(
+        r"VALOR TOTAL DA NOTA FISCAL:\s*R\$\s*([\d\.,]+)",
+        texto
+    )
+
+    valor_total = None
+    if valor_match:
+        valor_total = float(
+            valor_match.group(1)
+            .replace(".", "")
+            .replace(",", ".")
+        )
+
+    return {
+        "data_emissao": data_emissao,
+        "valor_total": valor_total
+    }

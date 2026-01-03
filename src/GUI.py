@@ -23,6 +23,8 @@ def kill(message=None):
     else:
         updateStatus("ENCERRANDO O SISTEMA...")
         sleep(3)
+
+        
     try:
         print("Encerrando o programa...")
         eel.closeWindow()
