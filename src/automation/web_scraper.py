@@ -130,6 +130,7 @@ def downloadPDFs():
 """
 
 SOVA  
+---------
 ERRO : Fatura.__init__() 
 missing 6 required positional arguments: 
 'nf', 'valor_boleto', 'valor_total', 'emissao', 'vencimento', and 'unidade_cod'
